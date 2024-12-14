@@ -1,8 +1,10 @@
 Function Get-SetupCompleteOSDCloudUSB {
 
     #$OSDCloudUSB = Get-Volume.usb | Where-Object {($_.FileSystemLabel -match 'OSDCloud') -or ($_.FileSystemLabel -match 'BHIMAGE')} | Select-Object -First 1
-    $OSDCloudUSB = Get-PSProvider -PSProvider FileSystem | Where-Object { $_.Name -ne 'C' } 
-    Write-Host "OSDCloudUSB: $OSDCloudUSB" -ForegroundColor Yellow
+    $OSDCloudUSB = Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Name -ne 'C' } 
+    foreach ($Drive in $OSDCloudUSB){
+        Write-Host "OSDCloudUSB: $($Drive.Name)" -ForegroundColor Yellow
+    }
     if ($OSDCloudUSB){
         $SetupCompletePath = "$($OSDCloudUSB.Name):\OSDCloud\Config\Scripts\SetupComplete"
         Write-Host "SetupCompletePath: $SetupCompletePath" -ForegroundColor Yellow
