@@ -1,8 +1,9 @@
 Function Get-SetupCompleteOSDCloudUSB {
 
-    $OSDCloudUSB = Get-Volume.usb | Where-Object {($_.FileSystemLabel -match 'OSDCloud') -or ($_.FileSystemLabel -match 'BHIMAGE')} | Select-Object -First 1
+    #$OSDCloudUSB = Get-Volume.usb | Where-Object {($_.FileSystemLabel -match 'OSDCloud') -or ($_.FileSystemLabel -match 'BHIMAGE')} | Select-Object -First 1
+    $OSDCloudUSB = Get-PSProvider -PSProvider FileSystem | Where-Object { $_.Name -ne 'C' } 
     if ($OSDCloudUSB){
-        $SetupCompletePath = "$($OSDCloudUSB.DriveLetter):\OSDCloud\Config\Scripts\SetupComplete"
+        $SetupCompletePath = "$($OSDCloudUSB.Name):\OSDCloud\Config\Scripts\SetupComplete"
         if (Test-Path $SetupCompletePath){$SetupComplete = Get-ChildItem $SetupCompletePath}
         if ($SetupComplete){
             return $true
