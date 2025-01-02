@@ -10,6 +10,43 @@ Note, the changes I make won't go into effect until the next module release date
 
 ## Changes
 
+### 24.11.15 (not yet implemented)
+ - Several minor changes over the past month, including a bug fix - see issues closed over the past month
+ - Completely revamped the index lookup in the DEV GUI - Modified to use a generic Index Map for all Build Versions.  This will greatly simplify the method no longer requiring me to build a new Index Map for each build.
+  - As part of this, built a new Index Map JSON/XML files in the Catalog folders. Will eventually go back and cleanup the no longer used Index files 
+  - Still considering just dropping the Index Field in the GUI, and have it dynamically figured out in the main OSDCLOUD function script
+
+### 24.11.14 (not yet implemented)
+ - Updated the 24H2 Catalog file with the latest release to public available from MS on 24.10.04
+
+### 24.10.1 (Released to Gallary)
+ - Updates for Windows 11 24H2 x64 and ARM64
+  - Updated Catalog JSON & XML files
+  - Updated to OSD.json file to add options for 24H2
+  - Still to do is create the index JSON file, this takes a long to to build, hopefully done by sometime tomorrow
+    - This is to support Start-OSDCloudGUIDev (which is dynamic), which is also required for ARM64, I think?
+  - Single test with Start-OSDCloudGUI with Win 11 24H2 was successful
+
+### 24.7.8 (Released to Gallary)
+ - Created Function: Add-7Zip2BootImage
+   - Will be used in New-OSDCloudTemplate & Edit-OSDCloudWinPE to add 7zip into your boot images.
+
+### 24.7.3 (Released to Gallary)
+- Added several HP Functions into OSD Module that mirror HP CMSL but work in WinPE
+ - Get-HPDriverPackLatest - Will find the latest driver pack for a platform, with options for download or just URL
+ - Get-HPOSSUpport - Lists the supported Windows OS's supported by a platform
+ - Get-HPSoftpaqListLatest - Finds latest supported OS for Platform and provides list of softpaqs
+ - Get-HPSoftpaqItems - Provides list of Softpaqs for a Platform based on user input
+- Adding ability for OSDCloud to reach directly to HP's catalog realtime, find latest driver pack, download.
+ - New Variable: HPCMSLDriverPackLatest tell OSDCloud to use this new feature. (not available in GUI, maybe never will be?)
+- Adding 7zip (7za.exe) features to extract HP Softpaqs while in WinPE to DISM in while offline
+  - Requires you use the new -Add7Zip when using New-OSDCloudTemplate function
+  - Will add functionality into Edit-OSDCloudWinPE eventually, for now, just download the extra.7z 7zip download, grab the 3 files in the x64 folder and add them to your system32 folder on the boot wim.
+  - Issue open with 7zip GitHub to see if possible to add on the fly in WinPE: [Issue 24](https://github.com/ip7z/7zip/issues/24)
+  
+### Other
+- Several small updates to resolve issues, sorry I forgot to add info here, feel free to look at commits if you're really interested
+
 ### 24.3.27 (implemented in OSD Module 24.3.27.1)
 - Quick fix for [Issue 132](https://github.com/OSDeploy/OSD/issues/132)
 - Minor updates to DEV for ARM64 testing

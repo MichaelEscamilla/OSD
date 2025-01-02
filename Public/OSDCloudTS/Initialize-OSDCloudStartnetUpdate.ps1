@@ -42,6 +42,7 @@ function Initialize-OSDCloudStartnetUpdate {
     #Start-Process PowerShell -WindowStyle Minimized
     Start-Process PowerShell -WindowStyle Minimized -ArgumentList '-NoExit','-NoLogo',"ipconfig /all"
 
+    #Open PowerShell Window for Error Hardware that requires Drivers to function properly
     $Win32PnPEntityErrorName = $Win32PnPEntityError | Where-Object {$null -ne $_.Name}
     if ($Win32PnPEntityErrorName) {
         Write-Host -ForegroundColor Green "$($TimeSpan.ToString("mm':'ss")) Opening PowerShell window to detail Hardware with Driver errors (minimized)"
@@ -131,7 +132,7 @@ function Initialize-OSDCloudStartnetUpdate {
                 Start-Sleep -Seconds 5
             }
             else {
-                Write-Host -ForegroundColor Green "TPM 2.0 and Autopilot: Supported"
+                Write-Host -ForegroundColor Green "TPM 2.0 ($($Win32Tpm.ManufacturerIdTxt), $($Win32Tpm.ManufacturerVersion)) and Autopilot: Supported"
                 #Write-Host -ForegroundColor DarkGray "TPM IsActivated: $($Win32Tpm.IsActivated_InitialValue)"
                 #Write-Host -ForegroundColor DarkGray "TPM IsEnabled: $($Win32Tpm.IsEnabled_InitialValue)"
                 #Write-Host -ForegroundColor DarkGray "TPM IsOwned: $($Win32Tpm.IsOwned_InitialValue)"

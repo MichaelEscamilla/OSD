@@ -122,7 +122,11 @@
         })]
         [System.IO.FileInfo]
         #Imports and uses a WiFi Profile to connect to WiFi
-        $WifiProfile
+        $WifiProfile,
+
+        [System.Management.Automation.SwitchParameter]
+        #Adds 7Zip to Boot Image
+        $Add7Zip
     )
     #=================================================
     #	Start the Clock
@@ -391,6 +395,13 @@ PowerShell -Nol -C Initialize-OSDCloudStartnetUpdate
         robocopy "$env:TEMP" "$MountPath\Windows\System32" winpe.jpg /ndl /njh /njs /b /np /r:0 /w:0
         robocopy "$env:TEMP" "$MountPath\Windows\System32" winre.jpg /ndl /njh /njs /b /np /r:0 /w:0
     }
+    #endregion
+
+    #region Add7Zip
+    if ($PSBoundParameters.ContainsKey('Add7Zip')) {
+        Write-Host -ForegroundColor Yellow "$((Get-Date).ToString('yyyy-MM-dd-HHmmss')) Adding 7zip (7za.exe) to WinPE"
+        Add-7Zip2BootImage
+    }   
     #endregion
 
     #region OSD PowerShell Module

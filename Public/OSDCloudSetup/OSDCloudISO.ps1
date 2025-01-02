@@ -59,6 +59,13 @@ function New-OSDCloudISO {
         Write-Warning "$((Get-Date).ToString('yyyy-MM-dd-HHmmss')) Unable to find an OSDCloud WinPE at $WorkspacePath\Media\sources\boot.wim"
         Break
     }
+
+    #region OSDeploy Compatibility
+    if (Test-Path "$WorkspacePath\OSDeploy.iso") {
+        $isoFileName = 'OSDeploy.iso'
+        $isoLabel = 'OSDeploy'
+    }
+    #endregion
     #=================================================
     #   Create ISO
     #=================================================

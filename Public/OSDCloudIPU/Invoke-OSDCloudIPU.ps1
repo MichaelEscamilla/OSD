@@ -9,6 +9,8 @@ function Invoke-OSDCloudIPU {
 
         [Parameter(ParameterSetName = 'Default')]
         [ValidateSet(
+            'Windows 11 24H2 x64',
+            'Windows 11 24H2 ARM64', 
             'Windows 11 23H2 x64',
             'Windows 11 23H2 ARM64',    
             'Windows 11 22H2 x64',
@@ -16,7 +18,7 @@ function Invoke-OSDCloudIPU {
             'Windows 10 22H2 x64',
             'Windows 10 22H2 ARM64')]
         [System.String]
-        $OSName = 'Windows 11 23H2 x64',
+        $OSName = 'Windows 11 24H2 x64',
 
         [switch]
         $Silent,
@@ -31,7 +33,10 @@ function Invoke-OSDCloudIPU {
         $DownloadOnly,
 
         [switch]
-        $DiagnosticPrompt
+        $DiagnosticPrompt,
+
+        [switch]
+        $DynamicUpdate
     )
     #region Admin Elevation
     $whoiam = [system.security.principal.windowsidentity]::getcurrent().name
@@ -59,18 +64,18 @@ function Invoke-OSDCloudIPU {
             $verBuild    = [Convert]::ToInt32($versionInfo[4..6] -join '', 16)
             $verRevision = 0
             [version]$ver = "$verMaj`.$verMin`.$verBuild`.$verRevision"
-            Write-Output "TPM Verion: $ver | Spec: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).SpecVersion)"
+            Write-Output "TPM Version: $ver | Spec: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).SpecVersion)"
             }
-        else {Write-Output "TPM Verion: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).ManufacturerVersion) | Spec: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).SpecVersion)"}
+        else {Write-Output "TPM Version: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).ManufacturerVersion) | Spec: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).SpecVersion)"}
         }
 
     else
         {
         if ($((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).SpecVersion) -match "1.2")
             {
-            Write-Output "TPM Verion: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).ManufacturerVersion) | Spec: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).SpecVersion)"
+            Write-Output "TPM Version: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).ManufacturerVersion) | Spec: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).SpecVersion)"
             }
-        else {Write-Output "TPM Verion: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).ManufacturerVersion) | Spec: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).SpecVersion)"}
+        else {Write-Output "TPM Version: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).ManufacturerVersion) | Spec: $((Get-CimInstance -Namespace "ROOT\cimv2\Security\MicrosoftTpm" -ClassName Win32_TPM).SpecVersion)"}
         }
     }
 
@@ -113,7 +118,7 @@ function Invoke-OSDCloudIPU {
     Write-Output "Architecture (Get-NativeMatchineImage): $((Get-NativeMatchineImage).NativeMachine)"
     Write-Output "Computer Model: $ComputerModel"
     Write-Output "Serial: $Serial"
-    if ($Manufacturer -like "H*"){Write-Output "Computer Product Code: $HPProdCode"}
+    if ($Manufacturer -like "HP" -or $Manufacturer -like "Hewlett"){Write-Output "Computer Product Code: $HPProdCode"}
     Write-Output $cpuDetails.Name
     Write-Output "Current BIOS Level: $($BIOSInfo.SMBIOSBIOSVersion) From Date: $CurrentBIOSDate"
     Get-TPMVer
@@ -126,7 +131,7 @@ function Invoke-OSDCloudIPU {
     if ($Locale -ne "en-US"){Write-Output "WinSystemLocale: $locale"}
     $FreeSpace = (Get-CimInstance win32_LogicalDisk -Filter "DeviceID='C:'").FreeSpace/1GB -as [int]
     $DiskSize = (Get-CimInstance win32_LogicalDisk -Filter "DeviceID='C:'").Size/1GB -as [int]
-    Write-Output "C:\ Drive Size: $DiskSize, Freespace: $FreeSpace"
+    Write-Output "C:\ Drive Size: $DiskSize, Free Space: $FreeSpace"
 
     if ($Build -le 19045){
         $Win11 = Get-Win11Readiness
@@ -140,7 +145,7 @@ function Invoke-OSDCloudIPU {
             }
             elseif ($Build -lt 19045){
                 write-host -ForegroundColor Green "But.. You can upgrade it to Windows 10 22H2"
-            }
+            } 
         }
     }
 
@@ -159,7 +164,7 @@ function Invoke-OSDCloudIPU {
     #endregion Device Info
 
     #============================================================================
-    #region Current Activiation
+    #region Current Activation
     #============================================================================
 
     if (!($OSEdition)){
@@ -176,7 +181,7 @@ function Invoke-OSDCloudIPU {
     }
     $OSArch = $env:PROCESSOR_ARCHITECTURE   
     if ($OSArch -eq "AMD64"){$OSArch = 'x64'}
-    #endregion Current Activiation
+    #endregion Current Activation
     
     if ($OSArch -eq "ARM64"){
         #=================================================
@@ -357,7 +362,7 @@ function Invoke-OSDCloudIPU {
         Write-Host -ForegroundColor DarkGray "Start-BitsTransfer -Source $ESD.Url -Destination $ImageFolderPath -DisplayName $($ESD.FileName) -Description 'Windows Media Download' -RetryInterval 60"
         $BitsJob = Start-BitsTransfer -Source $ESD.Url -Destination $ImageFolderPath -DisplayName "$($ESD.FileName)" -Description "Windows Media Download" -RetryInterval 60
         If ($BitsJob.JobState -eq "Error"){
-            write-Host "BITS tranfer failed: $($BitsJob.ErrorDescription)"
+            write-Host "BITS transfer failed: $($BitsJob.ErrorDescription)"
         }
 
     }
@@ -453,9 +458,31 @@ function Invoke-OSDCloudIPU {
             Write-Host -ForegroundColor Cyan "$((Get-Date).ToString('yyyy-MM-dd-HHmmss')) Expanding DriverPack for Upgrade Media"   
             Expand-StagedDriverPack
             $DriverPackFile = Get-ChildItem -Path $DriverPackPath -Filter $DriverPack.FileName
-            $DriverPackExpandPath = Join-Path $DriverPackFile.Directory $DriverPackFile.BaseName
-            if (Test-Path -Path $DriverPackExpandPath){
 
+            if ($Manufacturer -like "LENOVO"){
+                $DriverPackExpandPath = "$($DriverPackFile.Directory)\SCCM\$($DriverPackFile.BaseName)"
+            }
+            else{
+                $DriverPackExpandPath = Join-Path $DriverPackFile.Directory $DriverPackFile.BaseName
+            }
+            if (Test-Path -Path $DriverPackExpandPath){
+                Write-Host -ForegroundColor Green "Confirmed Driver Pack Expanded to $DriverPackExpandPath"
+            }
+            else {
+                Write-Host -ForegroundColor Red "Driver Pack Failed to Expand to $DriverPackExpandPath"
+                if ($Silent){
+                    Write-Host -ForegroundColor Red "Continuing without Driver Pack integration"
+                }
+                else {
+                    $DriverContinueInput = Read-Host "Do you want to continue without Driver Pack? (Y/N)"
+                    if ($DriverContinueInput -eq 'Y' -or $DriverContinueInput -eq 'y') {
+                        Write-Host -ForegroundColor Red "Continuing without Driver Pack integration"
+                    } elseif ($DriverContinueInput -eq 'N' -or $DriverContinueInput -eq 'n') {
+                        throw "Driver Pack Failed to Expand to $DriverPackExpandPath"
+                    } else {
+                        Write-Output "Invalid input. Please enter Y or N."
+                    }
+                }
             }
         }
     }

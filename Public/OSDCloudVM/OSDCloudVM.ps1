@@ -96,12 +96,20 @@ function New-OSDCloudVM {
 
         # Set VM Name
         $VmName = "$($NewOSDCloudVM.NamePrefix)$((Get-Date).ToString('yyMMddHHmmss'))"
+        
+        # OSDeploy Compatibility
+        if (Test-Path (Join-Path $(Get-OSDCloudWorkspace) 'OSDeploy_NoPrompt.iso')) {
+            $DvdDrivePath = Join-Path $(Get-OSDCloudWorkspace) 'OSDeploy_NoPrompt.iso'
+        }
+        else {
+            $DvdDrivePath = Join-Path $(Get-OSDCloudWorkspace) 'OSDCloud_NoPrompt.iso'
+        }
 
         # Build Final Configuration
         $Global:OSDCloudVM = $null
         $Global:OSDCloudVM = [ordered]@{
             CheckpointVM                = $NewOSDCloudVM.CheckpointVM
-            DvdDrivePath                = Join-Path $(Get-OSDCloudWorkspace) 'OSDCloud_NoPrompt.iso'
+            DvdDrivePath                = $DvdDrivePath
             Generation                  = $NewOSDCloudVM.Generation
             MemoryStartupBytes          = ($NewOSDCloudVM.MemoryStartupGB * 1GB)
             MemoryStartupGB             = $NewOSDCloudVM.MemoryStartupGB

@@ -48,7 +48,6 @@ function Get-OSDCloudTemplate {
     if (Test-Path "$env:ProgramData\OSDCloud\template.json") {
         $TemplateSettings = Get-Content -Path "$env:ProgramData\OSDCloud\template.json" | ConvertFrom-Json
         $TemplatePath = $TemplateSettings.TemplatePath
-        
     }
     $TemplatePath
     #endregion
@@ -81,7 +80,17 @@ function Get-OSDCloudTemplateNames {
     #region Build Array
     $Results = @()
     [System.Array]$Results = 'default'
-    [System.Array]$Results += Get-ChildItem -Path "$env:ProgramData\OSDCloud\Templates" | Where-Object {$_.PsIsContainer -eq $true} | Select-Object -ExpandProperty Name
+    [System.Array]$Results += Get-ChildItem -Path "$env:ProgramData\OSDCloud\Templates" | Where-Object { $_.PsIsContainer -eq $true } | Select-Object -ExpandProperty Name
+
+    #region OSDeploy Compatibility
+    if (Test-Path "$env:ProgramData\OSDeploy\MyBootMedia") {
+        [System.Array]$Results += Get-ChildItem -Path "$env:ProgramData\OSDeploy\MyBootMedia" | Where-Object { $_.PsIsContainer -eq $true } | Select-Object -ExpandProperty Name
+    }
+    if (Test-Path "$env:ProgramData\OSDeploy\WinPEBootMedia") {
+        [System.Array]$Results += Get-ChildItem -Path "$env:ProgramData\OSDeploy\WinPEBootMedia" | Where-Object { $_.PsIsContainer -eq $true } | Select-Object -ExpandProperty Name
+    }
+    #endregion
+
     [System.Array]$Results
     #endregion
 }
@@ -155,7 +164,11 @@ function New-OSDCloudTemplate {
 
         [System.Management.Automation.SwitchParameter]
         #Uses ARM64 instead of AMD64
-        $ARM64
+        $ARM64,
+
+        [System.Management.Automation.SwitchParameter]
+        #Adds 7Zip to Boot Image
+        $Add7Zip
     )
 #=================================================
 #   WinREDriver
@@ -544,6 +557,7 @@ Windows Registry Editor Version 5.00
         'EnhancedStorage'
         'FMAPI'
         'GamingPeripherals'
+        'HSP-Driver'
         'PPPoE'
         'PlatformId'
         'PmemCmdlets'
@@ -758,6 +772,14 @@ Windows Registry Editor Version 5.00
         Write-Warning "Could not find $SourceFile"
     }
     #=================================================
+    #	7zip x64 Portable
+    #=================================================
+    if ($PSBoundParameters.ContainsKey('Add7Zip')) {
+        Add-7Zip2BootImage
+    }    
+    
+
+    #=================================================
     #   Adding Microsoft DartConfig from MDT
     #=================================================
     Write-Host -ForegroundColor DarkGray "========================================================================="
@@ -853,7 +875,7 @@ Windows Registry Editor Version 5.00
 
         $Params = @{
             ErrorAction = 'Stop'
-            LogLevel = 'Debug'
+            LogLevel = 'WarningsInfo'
             LogPath = "$TemplateLogs\$((Get-Date).ToString('yyyy-MM-dd-HHmmss'))-CumulativeUpdate.log"
             PackagePath = $CumulativeUpdate
             Path = $MountPath
@@ -1051,8 +1073,16 @@ function Set-OSDCloudTemplate {
 
     #region Set Template Path
     if ($Name -ne 'default') {
-        $OSDCloudTemplate = "$env:ProgramData\OSDCloud\Templates\$Name"
-
+        # OSDeploy Compatibility
+        if (Test-Path "$env:ProgramData\OSDeploy\MyBootMedia\$Name") {
+            $OSDCloudTemplate = "$env:ProgramData\OSDeploy\MyBootMedia\$Name"
+        }
+        elseif (Test-Path "$env:ProgramData\OSDeploy\WinPEBootMedia\$Name") {
+            $OSDCloudTemplate = "$env:ProgramData\OSDeploy\WinPEBootMedia\$Name"
+        }
+        else {
+            $OSDCloudTemplate = "$env:ProgramData\OSDCloud\Templates\$Name"
+        }
         if (-NOT (Test-Path "$OSDCloudTemplate\Media\sources\boot.wim")) {
             $Name = 'default'
         }

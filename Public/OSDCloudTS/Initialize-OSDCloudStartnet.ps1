@@ -56,35 +56,35 @@ function Initialize-OSDCloudStartnet {
         When Edit-OSDCloudWinPE is executed then these files should be copied to the mounted WinPE
         In WinPE, the scripts will exist in X:\OSDCloud\Config\Scripts\*
         #>
+        Write-Host -ForegroundColor Cyan '[i] Config StartNet Scripts'
         $Global:ScriptStartNet = Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Name -ne 'C' } | ForEach-Object {
+            Write-Host -ForegroundColor DarkGray "$($_.Root)OSDCloud\Config\Scripts\StartNet\*.ps1"
             Get-ChildItem "$($_.Root)OSDCloud\Config\Scripts\StartNet\" -Include "*.ps1" -File -Recurse -Force -ErrorAction Ignore
         }
         if ($Global:ScriptStartNet) {
-            $TimeSpan = New-TimeSpan -Start $Global:StartnetStart -End (Get-Date)
-            Write-Host -ForegroundColor DarkGray "$($TimeSpan.ToString("mm':'ss")) Initialize Startnet Scripts"
             $Global:ScriptStartNet = $Global:ScriptStartNet | Sort-Object -Property FullName
             foreach ($Item in $Global:ScriptStartNet) {
-                Write-Host -ForegroundColor DarkGray "$($Item.FullName)"
+                Write-Host -ForegroundColor Gray "Execute $($Item.FullName)"
                 & "$($Item.FullName)"
             }
         }
 
         # Initialize Splash Screen  
         # Looks for SPLASH.JSON files in OSDCloud\Config, if found, it will run a splash screen.
+        Write-Host -ForegroundColor Cyan '[i] Splash Screen Configuration'
         $Global:SplashScreen = Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Name -ne 'C' } | ForEach-Object {
+            Write-Host -ForegroundColor DarkGray "$($_.Root)OSDCloud\Config\SPLASH.JSON"
             Get-ChildItem "$($_.Root)OSDCloud\Config\" -Include "SPLASH.JSON" -File -Recurse -Force -ErrorAction Ignore
         }
 
         if ($Global:SplashScreen) {
-            $TimeSpan = New-TimeSpan -Start $Global:StartnetStart -End (Get-Date)
-            Write-Host -ForegroundColor DarkGray "$($TimeSpan.ToString("mm':'ss")) Initialize Splash Screen"
             $Global:SplashScreen = $Global:SplashScreen | Sort-Object -Property FullName
             foreach ($Item in $Global:SplashScreen) {
-                Write-Host -ForegroundColor DarkGray "Found: $($Item.FullName)"
+                Write-Host -ForegroundColor Gray "Apply $($Item.FullName)"
             }
             if ($Global:SplashScreen.count -gt 1) {
                 $SplashJson = $Global:SplashScreen | Select-Object -Last 1
-                Write-Host -ForegroundColor DarkGray "Using $($SplashJson.FullName)"
+                Write-Host -ForegroundColor DarkGray "Multiple Splash Screen configurations, using $($Item.FullName)"
             }
             if (Test-Path -Path "C:\OSDCloud\Logs") {
                 Remove-Item -Path "C:\OSDCloud\Logs" -Recurse -Force
@@ -119,10 +119,28 @@ function Initialize-OSDCloudStartnet {
             }
         }
 
-        # Initialize Network Connections
-        # $TimeSpan = New-TimeSpan -Start $Global:StartnetStart -End (Get-Date)
-        # Write-Host -ForegroundColor DarkGray "$($TimeSpan.ToString("mm':'ss")) Initialize Network Connections"
-        Start-Sleep -Seconds 5
+        # Wait for the network to initialize
+        $TimeSpan = New-TimeSpan -Start $Global:StartnetStart -End (Get-Date)
+        Write-Host -ForegroundColor DarkGray "$($TimeSpan.ToString("mm':'ss")) Initialize Network Connections"
+        $timeout = 0
+        while ($timeout -lt 20) {
+            Start-Sleep -Seconds $timeout
+            $timeout = $timeout + 5
+
+            $IP = Test-Connection -ComputerName $(HOSTNAME) -Count 1 | Select-Object -ExpandProperty IPV4Address
+            if ($null -eq $IP) {
+                Write-Host -ForegroundColor DarkGray "Network adapter error. This should not happen !"
+            }
+            elseif ($IP.IPAddressToString.StartsWith("169.254") -or $IP.IPAddressToString.Equals("127.0.0.1")) {
+                Write-Host -ForegroundColor DarkGray "IP address not yet assigned by DHCP. Trying to get a new DHCP lease.."
+                ipconfig /release | Out-Null
+                ipconfig /renew | Out-Null
+            }
+            else {
+                Write-Host -ForegroundColor DarkGray "Network configuration renewed with IP: $($IP.IPAddressToString)"
+                break
+            }
+        }
 
         # Check if the OSD Module in the PowerShell Gallery is newer than the installed version
         $TimeSpan = New-TimeSpan -Start $Global:StartnetStart -End (Get-Date)
