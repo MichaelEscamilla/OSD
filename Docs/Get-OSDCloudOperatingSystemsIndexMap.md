@@ -5,19 +5,19 @@ online version: https://github.com/OSDeploy/OSD/tree/master/Docs
 schema: 2.0.0
 ---
 
-# Update-MicrosoftDriverPackCatalog
+# Get-OSDCloudOperatingSystemsIndexMap
 
 ## SYNOPSIS
-Updates the local Microsoft Surface DriverPacks in the OSD Module
+Returns the Operating System Indexes used by OSDCloud
 
 ## SYNTAX
 
 ```
-Update-MicrosoftDriverPackCatalog [-UpdateModuleCatalog] [-Verify] [<CommonParameters>]
+Get-OSDCloudOperatingSystemsIndexMap [-OSArch <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Updates the local Microsoft Surface DriverPacks in the OSD Module
+Returns the Operating System Indexes used by OSDCloud
 
 ## EXAMPLES
 
@@ -30,34 +30,17 @@ PS C:\> {{ Add example code here }}
 
 ## PARAMETERS
 
-### -UpdateModuleCatalog
-Updates the OSD Module Offline Catalog.
-Requires Admin rights
+### -OSArch
+{{ Fill OSArch Description }}
 
 ```yaml
-Type: SwitchParameter
+Type: String
 Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Verify
-Verifies that the DriverPack is reachable.
-This will take some time to complete
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
+Default value: X64
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

@@ -96,13 +96,24 @@ function New-OSDCloudVM {
 
         # Set VM Name
         $VmName = "$($NewOSDCloudVM.NamePrefix)$((Get-Date).ToString('yyMMddHHmmss'))"
-        
-        # OSDeploy Compatibility
-        if (Test-Path (Join-Path $(Get-OSDCloudWorkspace) 'OSDeploy_NoPrompt.iso')) {
+
+        if (($Global:OSDKBootMedia) -and (Test-Path $($Global:OSDKBootMedia.BootMediaPath) -ErrorAction SilentlyContinue)) {
+            $DvdDrivePath = Join-Path $($Global:OSDKBootMedia.BootMediaPath) 'OSDKBoot_NoPrompt.iso'
+        }
+        elseif (Test-Path (Join-Path $(Get-OSDCloudWorkspace) 'OSDeploy_NoPrompt.iso')) {
             $DvdDrivePath = Join-Path $(Get-OSDCloudWorkspace) 'OSDeploy_NoPrompt.iso'
         }
-        else {
+        elseif (Test-Path (Join-Path $(Get-OSDCloudWorkspace) 'OSDCloud_NoPrompt.iso')) {
             $DvdDrivePath = Join-Path $(Get-OSDCloudWorkspace) 'OSDCloud_NoPrompt.iso'
+        }
+        elseif (Test-Path (Join-Path $(Get-OSDCloudWorkspace) 'OSDKBoot_NoPrompt.iso')) {
+            $DvdDrivePath = Join-Path $(Get-OSDCloudWorkspace) 'OSDKBoot_NoPrompt.iso'
+        }
+        elseif (Test-Path (Join-Path $(Get-OSDCloudWorkspace) 'BootMedia_NoPrompt.iso')) {
+            $DvdDrivePath = Join-Path $(Get-OSDCloudWorkspace) 'BootMedia_NoPrompt.iso'
+        }
+        elseif (Test-Path (Join-Path $(Get-OSDCloudWorkspace) 'WinRE_NoPrompt.iso')) {
+            $DvdDrivePath = Join-Path $(Get-OSDCloudWorkspace) 'WinRE_NoPrompt.iso'
         }
 
         # Build Final Configuration
