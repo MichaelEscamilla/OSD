@@ -5,19 +5,19 @@ online version: https://github.com/OSDeploy/OSD/tree/master/Docs
 schema: 2.0.0
 ---
 
-# Update-MicrosoftDriverPackCatalog
+# Update-WinPEDrivers
 
 ## SYNOPSIS
-Updates the local Microsoft Surface DriverPacks in the OSD Module
+Updates the WinPEDrivers repository in the OSDCache at $env:ProgramData\OSDCache from the GitHub Origin.
 
 ## SYNTAX
 
 ```
-Update-MicrosoftDriverPackCatalog [-UpdateModuleCatalog] [-Verify] [<CommonParameters>]
+Update-WinPEDrivers [-Force] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Updates the local Microsoft Surface DriverPacks in the OSD Module
+Updates the WinPEDrivers repository in the OSDCache at $env:ProgramData\OSDCache from the GitHub Origin.
 
 ## EXAMPLES
 
@@ -30,25 +30,8 @@ PS C:\> {{ Add example code here }}
 
 ## PARAMETERS
 
-### -UpdateModuleCatalog
-Updates the OSD Module Offline Catalog.
-Requires Admin rights
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Verify
-Verifies that the DriverPack is reachable.
-This will take some time to complete
+### -Force
+Force the update of the Git Repository, overwriting all content.
 
 ```yaml
 Type: SwitchParameter
@@ -70,8 +53,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
+David Segura
 
 ## RELATED LINKS
-
-[https://github.com/OSDeploy/OSD/tree/master/Docs](https://github.com/OSDeploy/OSD/tree/master/Docs)
-

@@ -38,9 +38,9 @@ function Copy-OSDCloud.media {
     #=================================================
     #   Get Adk Paths
     #=================================================
-    $AdkPaths = Get-AdkPaths
+    $WindowsAdkPaths = Get-WindowsAdkPaths
 
-    if ($null -eq $AdkPaths) {
+    if ($null -eq $WindowsAdkPaths) {
         Write-Warning "Could not get ADK going, sorry"
         Break
     }
@@ -48,12 +48,12 @@ function Copy-OSDCloud.media {
     #   Get WinPE.wim
     #=================================================
     $WorkspacePath = "$env:ProgramData\OSDCloud"
-    $WimSourcePath = $AdkPaths.WimSourcePath
+    $WimSourcePath = $WindowsAdkPaths.WimSourcePath
     if (-NOT (Test-Path $WimSourcePath)) {
         Write-Warning "Could not find $WimSourcePath, sorry"
         Break
     }
-    $PathWinPEMedia = $AdkPaths.PathWinPEMedia
+    $PathWinPEMedia = $WindowsAdkPaths.PathWinPEMedia
     $DestinationMedia = Join-Path $WorkspacePath 'Media'
     Write-Verbose "Copying ADK Media to $DestinationMedia"
     robocopy "$PathWinPEMedia" "$DestinationMedia" *.* /e /ndl /xj /ndl /np /nfl /njh /njs
@@ -75,7 +75,7 @@ function Copy-OSDCloud.media {
     #   Add Packages
     #=================================================
     $ErrorActionPreference = 'Ignore'
-    $WinPEOCs = $AdkPaths.WinPEOCs
+    $WinPEOCs = $WindowsAdkPaths.WinPEOCs
 
     Add-WindowsPackage -Path $MountPath -PackagePath "$WinPEOCs\WinPE-WMI.cab"
     Add-WindowsPackage -Path $MountPath -PackagePath "$WinPEOCs\en-us\WinPE-WMI_en-us.cab"
@@ -97,7 +97,7 @@ function Copy-OSDCloud.media {
     Add-WindowsPackage -Path $MountPath -PackagePath "$WinPEOCs\WinPE-EnhancedStorage.cab"
     Add-WindowsPackage -Path $MountPath -PackagePath "$WinPEOCs\en-us\WinPE-EnhancedStorage_en-us.cab"
     Add-WindowsPackage -Path $MountPath -PackagePath "$WinPEOCs\WinPE-FMAPI.cab"
-    Add-WindowsPackage -Path $MountPath -PackagePath "$WinPEOCs\WinPE-GamingPeripherals.cab"
+    # Add-WindowsPackage -Path $MountPath -PackagePath "$WinPEOCs\WinPE-GamingPeripherals.cab"
     Add-WindowsPackage -Path $MountPath -PackagePath "$WinPEOCs\WinPE-PPPoE.cab"
     Add-WindowsPackage -Path $MountPath -PackagePath "$WinPEOCs\en-us\WinPE-PPPoE_en-us.cab"
     Add-WindowsPackage -Path $MountPath -PackagePath "$WinPEOCs\WinPE-PlatformId.cab"

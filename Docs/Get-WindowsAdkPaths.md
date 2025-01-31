@@ -1,23 +1,23 @@
 ---
 external help file: OSD-help.xml
 Module Name: OSD
-online version: https://github.com/OSDeploy/OSD/tree/master/Docs
+online version: https://osd.osdeploy.com/module/functions/general/get-osdsessions
 schema: 2.0.0
 ---
 
-# Get-AdkPaths
+# Get-WindowsAdkPaths
 
 ## SYNOPSIS
-Gets many Windows ADK Paths into a hash to easily use in your code
+Retrieves the command paths of the Windows Assessment and Deployment Kit (ADK).
 
 ## SYNTAX
 
 ```
-Get-AdkPaths [[-Arch] <String>] [<CommonParameters>]
+Get-WindowsAdkPaths [[-Architecture] <String>] [[-WindowsAdkRoot] <FileInfo>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Gets many Windows ADK Paths into a hash to easily use in your code
+Retrieves the command paths of the Windows Assessment and Deployment Kit (ADK).
 
 ## EXAMPLES
 
@@ -30,17 +30,34 @@ PS C:\> {{ Add example code here }}
 
 ## PARAMETERS
 
-### -Arch
-{{ Fill Arch Description }}
+### -Architecture
+Windows ADK architecture to get.
+Valid values are 'amd64', 'x86', and 'arm64'.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases:
+Aliases: Arch
 
 Required: False
 Position: 1
 Default value: $Env:PROCESSOR_ARCHITECTURE
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -WindowsAdkRoot
+Path to the Windows ADK root directory.
+Typically 'C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit'
+
+```yaml
+Type: FileInfo
+Parameter Sets: (All)
+Aliases: AdkRoot
+
+Required: False
+Position: 2
+Default value: None
 Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
@@ -53,10 +70,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
-21.3.15.2   Renamed to make it easier to understand what it does
-21.3.10     Initial Release
+Author: David Segura
 
 ## RELATED LINKS
-
-[https://github.com/OSDeploy/OSD/tree/master/Docs](https://github.com/OSDeploy/OSD/tree/master/Docs)
-
